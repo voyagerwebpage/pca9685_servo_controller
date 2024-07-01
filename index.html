@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Akshat G">
+    <meta name="description" content="PCA9685 controls">
+    <link rel="stylesheet" href="css/prism.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>PCA9685 controls</title>
+</head>
+
+<body>
+    <header>
+        <h1>PCA9685 16 channel 12 bits servo controller </h1>
+
+        <nav>
+            <ul>
+                <li><a href="#details">Details of the module with chip PCA9685</a></li>
+                <li><a href="#connections">Connecting to the Arduino</a></li>
+                <li><a href="#servo_setup">Servo Motor Setup</a>
+                </li>
+                <li><a href="#other_code_resources">Research Links</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+        <section id="details">
+            <h2>Details of the module with chip PCA9685</h2>
+            <figure>
+                <img src="images/PCA9685_printout.png" alt="PCA9685 printout" width="40%" style="display: inline-block;">
+                <img src="images/PCA9685_servo_controller_cad.png" alt="" width="50%" style="display: inline-block;">
+                <figcaption>
+                    CAD PCA9685 Structure
+                </figcaption>
+            </figure>
+
+
+            <h3>
+                Servo Pins:
+            </h3>
+            <ul>
+                <li>
+                    PWM: Pulse Width Modulation
+                </li>
+                <li>
+                    V+: Positive
+                </li>
+                <li>
+                    GND: Ground
+                </li>
+            </ul>
+
+            <h3>PCA9685 Power Pins</h3>
+            <ul>
+                <li>
+                    VCC - This is the logic power pin, should be 3 - 5V at max, get the power from arduino.
+                </li>
+                <li>
+                    GND: This is the power and signal ground pin, must be connected
+                </li>
+                <li>
+                    V+: This is the power pin that will supply distributed power to the servos. You can also provide
+                    power from the 2-pin terminal block at the top of the board. but if you mess up and connect VCC to
+                    V+ you could damage your board.
+                    <br>
+                    5V- high current can be supplied from the arduino but if you are using multiple servos you are
+                    required to supply DC from an external source
+                </li>
+            </ul>
+
+            <h3>PCA9685 Control Pins</h3>
+            <ul>
+                <li>
+                    SDA: 12C data pin, SDL is connected to Arduino Analog In [pin4] [A4]
+                </li>
+                <li>
+                    SCL: 12C clock pin, SCL is connected to Arduino Analog In [pin5] [A5]
+                </li>
+            </ul>
+
+            <figure>
+                <img src="images/PCA9685_pin_connection.png" alt="pin connection" width="90%">
+            </figure>
+        </section>
+
+        <hr>
+
+        <section id="connections">
+            <h2>Connecting to the Arduino</h2>
+            <ul>
+                <li>
+                    Classic Arduino Wiring:
+                    <ul>
+                        <li>
+                            +5v -> VCC (this is power for the BREAKOUT only, NOT the servo power!)
+                        </li>
+                        <li>
+                            GND -> GND
+                        </li>
+                        <li>
+                            Analog 4 -> SDA
+                        </li>
+                        <li>
+                            Analog 5 -> SCL
+                        </li>
+                    </ul>
+                </li>
+
+                <li>
+                    R3 and later Arduino wiring (Uno, Mega & Leonardo):
+                    <ul>
+                        <li>
+                            +5v -> VCC (this is power for the BREAKOUT only, NOT the servo power!)
+                        </li>
+                        <li>
+                            GND -> GND
+                        </li>
+                        <li>
+                            SDA -> SDA
+                        </li>
+                        <li>
+                            SCL -> SCL
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h2>Arduino and Power Supply</h2>
+            <figure>
+                <img src="images/PCA9685_unoConnectoin.png" alt="PCA9685 Uno connections" width="45%" style="display: inline-block;">
+                <img src="images/PCA9685_powerSupply.png" alt="Power Connection" width="45%" style="display: inline-block;">
+            </figure>
+
+            <h2>Circuit Diagram</h2>
+            <figure>
+                <img src="images/circuit_diagram.png" alt="servo circuit diagram" height="600px">
+            </figure>
+        </section>
+
+        <hr>
+
+        <section id="servo_setup">
+            <h2>Servo Motor Setup </h2>
+            <ul>
+                <li>
+                    <h3>Servo Driver Library Download [for PWM]</h3>
+                    <p>To begin reading sensor data, we have to install the
+                        <a href="https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library"
+                            target="_blank">Adafruit_PWMServo library </a>
+                    </p>
+                </li>
+                <li>
+                    <h3>Servo Setup Code</h3>
+                    <section id="finding_max_min_pulse">
+                        <h4>Finding Maximum and Minimum Pulse for Servo</h4>
+                        <div class="container">
+                            <div class="code-wrap">
+                                <pre>
+                            <code id="code" class="language-cpp">
+                                #include &lt; Wire.h &gt;
+                                #include &lt; Adafruit_PWMServoDriver.h &gt;
+                                
+                                Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+                                
+                                void setup()
+                                {
+                                    Serial.begin(9600);
+                                    Serial.println("16 channel Servo test");
+                                    pwm.begin();
+                                    pwm.setPWMFreq(60);
+                                    yield();
+                                }
+                                
+                                void loop()
+                                {
+                                    pwm.set(0, 0, 125);
+                                    delay(500);
+                                }
+                            </code>
+                        </pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="Servo Setup">
+                        <h4>Servo Setup</h4>
+                        <div class="container">
+                            <div class="code-wrap">
+                                <pre>
+                            <code id="code" class="language-cpp">
+                                    #include &lt;Wire.h&gt;
+                                    #include &lt;Adafruit_PWMServoDriver.h&gt;
+                                    
+                                    Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+                                    
+                                    /* Depending upon the servo motor we have to set the pulse width modulation max and min values.
+                                    We need this to be as small/large as possible without hitting the hard stop, for max range.
+                                    You'll have to tweak them as necessary to match the servos that we have */
+                                    
+                                     // this is the 'minimum' pulse length count (out of 4096)
+                                    #define SERVOMIN 125
+                                    // this is the 'maximum' pulse length count (out of 4096)
+                                    #define SERVOMAX 575 
+                                    
+                                    // our servo # counter
+                                    uint8_t servonum = 0;
+                                    
+                                    void setup()
+                                    {
+                                        // set up serial monitor to display the test 
+                                        Serial.begin(9600);
+                                        Serial.println("16 channel Servo test");
+                                    
+                                        // initialize the pulse width modulation
+                                        // helps begin the communication with the board
+                                        pwm.begin();
+                                    
+                                        // Analog servos run at ~60 Hz updates
+                                        pwm.setPWMFreq(60); 
+                                    
+                                        // yield() makes sure that other processes that take longer are finished before the next process
+                                        yield();
+                                    }
+                                    
+                                    void loop() {
+                                        // Drive each servo one at a time
+                                        Serial.println(servonum);
+                                        for(unit16_t pulselen = SERVOMIN; pulselen < SERVOMAX; purlselen++){
+                                            pwm.setPWM(servonum, 0, pulselen)
+                                        }
+                                    
+                                        delay(500);
+                                        for(unit16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--){
+                                            pwm.setPWM(servonum, 0, pulselen)
+                                        }
+                                    
+                                        servonum++; 
+                                        /*
+                                        the number 15 represents the number of the servo motors that are connected to the PCA9685,
+                                        change the number depending upon the number of servo motors that we want to control.
+                                        */
+                                        if(servonum > 15) servonum = 0;
+                                    }
+                            </code>
+                        </pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="Pulse to Angle">
+                        <h4>Pulse to Angle</h4>
+                        <div class="container">
+                            <div class="code-wrap">
+                                <pre>
+                <code id="code" class="language-cpp">
+                    #include &lt; Wire.h &gt;
+                    #include &lt; Adafruit_PWMServoDriver.h &gt;
+                    
+                    Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+                    // this is the 'minimum' pulse length count (out of 4096)
+                    #define SERVOMIN 125
+                    // this is the 'maximum' pulse length count (out of 4096)
+                    #define SERVOMAX 575
+                    
+                    void setup()
+                    {
+                        Serial.begin(9600);
+                        Serial.println("16 channel Servo test");
+                        pwm.begin();
+                        pwm.setPWMFreq(60);
+                        yield();
+                    }
+                    
+                    void loop()
+                    {
+                        int angle = 180; 
+                        int pulse = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+                        Serial.print("Angle: ");Serial.print(angle);
+                        Serial.print(" pulse: ");Serial.println(pulse);
+                        pwm.setPWM(0, 0, pulse)
+                    }
+                </code>
+            </pre>
+                            </div>
+                        </div>
+                        <p>
+                            Code to test the the servos with angle instead of pulse width:
+                        </p>
+                        <div class="container">
+                            <div class="code-wrap">
+                                <pre>
+                    <code id="code" class="language-cpp">
+                        #include &lt; Wire.h & gt;
+                        #include &lt; Adafruit_PWMServoDriver.h & gt;
+
+                        Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+                        #define SERVOMIN 125
+                        #define SERVOMAX 575
+
+                        // our servo # counter
+                        uint8_t servonum = 0;
+
+                        void setup()
+                    {
+                        Serial.begin(9600);
+                        Serial.println("16 channel Servo test!");
+                        pwm.begin();
+                        pwm.setPWMFreq(60);
+                        yield();
+                    }
+
+                    void loop()
+                    {
+                        for (int angle = 0; angle < 181; angle += 20)
+                        {
+                            delay(500);
+                            pwm.setPWM(0, 0, angleToPulse(angle));
+                        }
+                        delay(1000);
+                    }
+
+                    /*
+                     * angleToPulse(int ang)
+                     * gets angle in degree and returns the pulse width
+                     * also prints the value on seial monitor
+                     * written by Ahmad Nejrabi for Robojax, Robojax.com
+                     */
+                    int angleToPulse(int ang)
+                    {
+                        int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);
+                        Serial.print("Angle: ");
+                        Serial.print(ang);
+                        Serial.print(" pulse: ");
+                        Serial.println(pulse);
+                        return pulse;
+                    }
+                    </code>
+                </pre>
+                            </div>
+                        </div>
+                    </section>
+                </li>
+            </ul>
+
+        </section>
+
+        <hr>
+
+        <section id="other_code_resources">
+            <h2>Research Links: </h2>
+            <ul>
+                <li>
+                    <a href="https://robojax.com/learn/arduino/robojax_PCA9685.pdf">
+                        PCA9685 Data-sheet(pdf)
+                    </a>
+                </li>
+                <li>
+                    <a href="https://robojax.com/learn/arduino/?vid=robojax_PCA9685-V1" target="_blank">
+                        Arduino code and Video for PCA9685 16 channel 12 bits servo controller
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.youtube.com/watch?v=y8X9X10Tn1k">Complete guide to PCA9685 16 channel Servo controller for Arduino with code Version of 5</a>
+                </li>
+            </ul>
+
+        </section>
+    </main>
+
+    <hr>
+
+    <footer>
+        <a href="#">Back to Top</a>
+        <br>
+        <br>
+        &lt;&lt;&lt; &copy;<a href="https://www.linkedin.com/in/akshat-gururaj/" target="_blank">Akshat G</a>&gt;&gt;&gt;
+    </footer>
+
+    <hr>
+</body>
+
+<script src="prism.js"></script>
+
+</html>

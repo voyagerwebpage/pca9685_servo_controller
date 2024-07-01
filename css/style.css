@@ -1,0 +1,15 @@
+body {
+    /* adding border to the webpage */
+    min-height: 100vh;
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 1rem;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    font-size: 22px;
+}
+
+.container {
+    font-size: 16px;
+  }
+  
